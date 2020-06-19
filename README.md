@@ -220,6 +220,12 @@ libopencv_imgproc.a \
 
 It's about 6MB and we're ready to intergrate this file `libopencv_output.so` the Android project now.
 
+In Java, loading library by the code:
+
+```
+System.loadLibrary("opencv_output");
+```
+
 Done!
 
 
