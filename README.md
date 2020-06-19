@@ -8,10 +8,13 @@ OpenCV is an awesome library with an enumerous built-in modules which support us
 - [Docker latest](https://docs.docker.com/get-docker/)
 
 ## Setup Build Environment Steps
-Step 1. Clone the repository
+Step 1. Clone the repository and build the opencv_env image.
 
 ```
-cd ~ && git clone git@github.com:hzung/custom-build-opencv-android.git
+cd ~
+git clone git@github.com:hzung/custom-build-opencv-android.git
+cd ~/custom-build-opencv-android
+docker image build -t hungtv/opencv_env:v01 .
 ```
 
 Step 2. Clone opencv into `custom-build-opencv-android/opencv` and check out to the version `3.4.1`.
