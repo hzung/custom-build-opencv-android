@@ -1,0 +1,5 @@
+android-sdk-linux/
+android-ndk-r14b/
+opencv
+toolchains/arm*
+builds/arm*
