@@ -228,5 +228,156 @@ System.loadLibrary("opencv_output");
 
 Done!
 
+## Build Steps For armeabi-v7a
+**Step 1**. Access to the `bash` shell of the `opencv_env` container.
+
+```
+docker exec -it opencv_env /bin/bash
+```
+
+**Step 2**. Create the `arm64` toolchain.
+
+```
+/android-ndk-r14b/build/tools/make_standalone_toolchain.py --arch arm --api 23 --install-dir /toolchains/arm-toolchain
+```
+
+**Step 3**. Export the environment variables.
+
+```
+export ANDROID_STANDALONE_TOOLCHAIN=/toolchains/arm-toolchain
+```
+
+**Step 4**. Create a build directory for arm64-v8
+
+```
+mkdir /builds/armeabi-v7a
+```
+
+**Step 5**. Start configurations for compiling.
+
+```
+cd /builds/armeabi-v7a
+cmake \
+  -DCMAKE_TOOLCHAIN_FILE=/opencv/platforms/android/android.toolchain.cmake \
+  -DWITH_CAROTENE=OFF \
+  -DANDROID_STL=gnustl_static \
+  -DANDROID_NATIVE_API_LEVEL=23 \
+  -DWITH_OPENCL=OFF \
+  -DWITH_CUDA=OFF \
+  -DWITH_IPP=OFF \
+  -DBUILD_EXAMPLES=OFF \
+  -DBUILD_TESTS=OFF \
+  -DBUILD_PERF_TESTS=OFF \
+  -DBUILD_ANDROID_EXAMPLES=OFF \
+  -DINSTALL_ANDROID_EXAMPLES=OFF \
+  -DANDROID_ABI=armeabi-v7a \
+  -DWITH_TBB=ON \
+  /opencv
+```
+Wait until the configuration steps is completed.
+Using a text editor to open the file `/builds/armeabi-v7a/modules/java/CMakeFiles/opencv_java.dir/cmake_clean.cmake` and remove these lines.
+
+```
+"CMakeFiles/opencv_java.dir/generator/src/cpp/Mat.cpp.o"
+"CMakeFiles/opencv_java.dir/generator/src/cpp/converters.cpp.o"
+"CMakeFiles/opencv_java.dir/generator/src/cpp/jni_part.cpp.o"
+"CMakeFiles/opencv_java.dir/generator/src/cpp/listconverters.cpp.o"
+"CMakeFiles/opencv_java.dir/generator/src/cpp/utils.cpp.o"
+"CMakeFiles/opencv_java.dir/__/core/misc/java/src/cpp/core_manual.cpp.o"
+"CMakeFiles/opencv_java.dir/__/dnn/misc/java/src/cpp/dnn_converters.cpp.o"
+"CMakeFiles/opencv_java.dir/__/features2d/misc/java/src/cpp/features2d_converters.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/core.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/imgproc.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/ml.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/objdetect.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/photo.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/video.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/dnn.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/imgcodecs.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/videoio.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/features2d.cpp.o"
+"CMakeFiles/opencv_java.dir/gen/calib3d.cpp.o"
+```
+
+This configuration prevent the compiling process removing these files. We're gonna need these files when linking library (**step 9**).
+
+**Step 6**. Start compiling with 4 compiling jobs. Pick the greater number for faster compiling if your computer is trong.
+
+```
+make -j 4
+```
+
+After this step, you can import the `libopencv_java3.so` into the Android project. It should work fine. But this is not what we want. We want to make the size of `libopencv_java3.so` smaller. The current size is pretty big for us (16.8MB).
+
+**Step 7**. Let's custom the build contains only `libopencv_core.a` and `libopencv_imgproc.a`.
+
+```
+cd /builds/armeabi-v7a/lib/armeabi-v7a
+/toolchains/arm-toolchain/bin/*-android-g++ \
+-shared -o libopencv_output.so \
+--sysroot=/toolchains/arm-toolchain/sysroot/ \
+-Wl,--whole-archive \
+libopencv_core.a \
+libopencv_imgproc.a \
+-Wl,--no-whole-archive
+```
+
+**Step 8**. The size of `libopencv_output.so` is 10.4MB. Use this command to stripe the output library for smaller size.
+
+```
+/toolchains/arm-toolchain/bin/*-android-strip --strip-unneeded libopencv_output.so
+```
+The current's size is 6MB. It's good now.
+
+**Step 9**. Linking other dependencies of the library. After this step, the build's output is ready for using.
+
+```
+cd /builds/armeabi-v7a/lib/armeabi-v7a
+/toolchains/arm-toolchain/bin/*-android-g++ \
+-L /builds/armeabi-v7a/3rdparty/lib/arm64-v8a \
+-ldl \
+-lm \
+-llog \
+-ljnigraphics \
+-lz \
+-lcpufeatures \
+-fexceptions \
+-frtti \
+-fsigned-char \
+-shared -Wl,-soname,libopencv_output.so \
+-o libopencv_output.so \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/Mat.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/converters.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/jni_part.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/listconverters.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/utils.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/__/core/misc/java/src/cpp/core_manual.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/__/dnn/misc/java/src/cpp/dnn_converters.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/__/features2d/misc/java/src/cpp/features2d_converters.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/gen/core.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/gen/imgproc.cpp.o \
+--sysroot=/toolchains/arm-toolchain/sysroot \
+-Wl,--whole-archive \
+libopencv_core.a \
+libopencv_imgproc.a \
+-Wl,--no-whole-archive
+```
+
+**Step 10**. After the above step, the size of `libopencv_output.so` is increased a little bit. In this final step, let's stripe the file `libopencv_output.so` for smaller size. 
+
+```
+/toolchains/arm-toolchain/bin/*android-strip --strip-unneeded libopencv_output.so
+```
+
+It's about 6MB and we're ready to intergrate this file `libopencv_output.so` the Android project now.
+
+In Java, loading library by the code:
+
+```
+System.loadLibrary("opencv_output");
+```
+
+Done!
+
 
 
