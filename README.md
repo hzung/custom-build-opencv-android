@@ -152,7 +152,7 @@ This configuration prevent the compiling process removing these files. We're gon
 **Step 6**. Start compiling with 4 compiling jobs. Pick the greater number for faster compiling if your computer is trong.
 
 ```
-make -j 4
+cd ${BUILD_OUTPUT_DIR} && make -j 4
 ```
 
 After this step, you can import the `libopencv_java3.so` into the Android project. It should work fine. But this is not what we want. We want to make the size of `libopencv_java3.so` smaller. The current size is pretty big for us.
@@ -161,7 +161,7 @@ After this step, you can import the `libopencv_java3.so` into the Android projec
 
 ```
 cd ${BUILD_OUTPUT_DIR}/lib/${BUILD_OUTPUT_ARCH}
-/toolchains/arm-toolchain/bin/*android*g++ \
+${ANDROID_STANDALONE_TOOLCHAIN}/bin/*android*-g++ \
 -shared -o libopencv_output.so \
 --sysroot=${ANDROID_STANDALONE_TOOLCHAIN}/sysroot/ \
 -Wl,--whole-archive \
@@ -173,14 +173,14 @@ libopencv_imgproc.a \
 **Step 8**. Use this command to stripe the output library for smaller size.
 
 ```
-/toolchains/arm-toolchain/bin/*android*strip --strip-unneeded libopencv_output.so
+${ANDROID_STANDALONE_TOOLCHAIN}/bin/*android*strip --strip-unneeded libopencv_output.so
 ```
 
 **Step 9**. Linking other dependencies of the library. After this step, the build's output is ready for using.
 
 ```
 cd ${BUILD_OUTPUT_DIR}/lib/${BUILD_OUTPUT_ARCH}
-${ANDROID_STANDALONE_TOOLCHAIN}/bin/*android*g++ \
+${ANDROID_STANDALONE_TOOLCHAIN}/bin/*android*-g++ \
 -L ${BUILD_OUTPUT_DIR}/3rdparty/lib/${BUILD_OUTPUT_ARCH} \
 -ldl \
 -lm \
@@ -201,6 +201,7 @@ ${ANDROID_STANDALONE_TOOLCHAIN}/bin/*android*g++ \
 ../../modules/java/CMakeFiles/opencv_java.dir/__/core/misc/java/src/cpp/core_manual.cpp.o \
 ../../modules/java/CMakeFiles/opencv_java.dir/__/dnn/misc/java/src/cpp/dnn_converters.cpp.o \
 ../../modules/java/CMakeFiles/opencv_java.dir/__/features2d/misc/java/src/cpp/features2d_converters.cpp.o \
+../../3rdparty/cpufeatures/CMakeFiles/libcpufeatures.dir/cpu-features.c.o \
 ../../modules/java/CMakeFiles/opencv_java.dir/gen/core.cpp.o \
 ../../modules/java/CMakeFiles/opencv_java.dir/gen/imgproc.cpp.o \
 --sysroot=${ANDROID_STANDALONE_TOOLCHAIN}/sysroot \
