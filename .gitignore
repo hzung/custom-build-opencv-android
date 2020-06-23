@@ -2,4 +2,6 @@ android-sdk-linux/
 android-ndk-r14b/
 opencv
 toolchains/arm*
+toolchains/x86*
 builds/arm*
+builds/x86*

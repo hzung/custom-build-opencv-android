@@ -3,9 +3,10 @@
 
 OpenCV is an awesome library with an enumerous built-in modules which support us a lot in image processing. But sometimes, we don't need to import all of these modules to archive what we want. This could make the application size is pretty big. We just need some very specific modules such as `core lib` and `imgproc`. And in this tutorial, I'm gonna show you how to custom the opencv build for Android step-by-step.
 
-## Requirements
+## Environments
 
 - [Docker latest](https://docs.docker.com/get-docker/)
+
 
 ## Setup Build Environment Steps
 **Step 1**. Clone the repository and build the opencv_env image.
@@ -25,6 +26,21 @@ cd ~/custom-build-opencv-android/opencv && git checkout 3.4.0
 ```
 
 **Step 3**. Download and unzip [android-ndk-r14b](https://dl.google.com/android/repository/android-ndk-r14b-linux-x86_64.zip) into `custom-build-opencv-android/android-ndk-r14b`
+After unzipping the android-ndk-r14b, 
+
+**3.1.** Open the file `~/custom-build-opencv-android/android-ndk-r14b/build/tools/make_standalone_toolchain.py`
+
+**3.2.** Goto the line 402 and edit the line:
+
+```
+assert len(dirs) == 1
+```
+
+to 
+
+```
+assert len(dirs) >= 1
+```
 
 **Step 4**. Download and unzip [android-sdk-linux](https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz) into `custom-build-opencv-android/android-sdk-linux`
 
@@ -77,15 +93,46 @@ Here is the result directory structure. Make sure that the structure is correct.
 ```
 
 ## Build Steps For armeabi-v7a/arm64-v8a
-**Step 1**. Access to the `bash` shell of the `opencv_env` container and export the environment variables.
+
+**Step 1**. Access to the `bash` shell of the `opencv_env` container and export one of the environment variables.
+
+* Arch arm
 
 ```
 docker exec -it opencv_env /bin/bash
 export ANDROID_STANDALONE_TOOLCHAIN=/toolchains/arm-toolchain
-#Options: arm|arm64
 export TOOLCHAIN_ARCH=arm
-#Options: armeabi-v7a | arm64-v8a
 export BUILD_OUTPUT_ARCH=armeabi-v7a
+export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
+```
+
+* Arch arm64
+
+```
+docker exec -it opencv_env /bin/bash
+export ANDROID_STANDALONE_TOOLCHAIN=/toolchains/arm64-toolchain
+export TOOLCHAIN_ARCH=arm64
+export BUILD_OUTPUT_ARCH=arm64-v8a
+export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
+```
+
+* Arch x86
+
+```
+docker exec -it opencv_env /bin/bash
+export ANDROID_STANDALONE_TOOLCHAIN=/toolchains/x86-toolchain
+export TOOLCHAIN_ARCH=x86
+export BUILD_OUTPUT_ARCH=x86
+export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
+```
+
+* [CHECKING] Arch x86_64
+
+```
+docker exec -it opencv_env /bin/bash
+export ANDROID_STANDALONE_TOOLCHAIN=/toolchains/x86_64-toolchain
+export TOOLCHAIN_ARCH=x86_64
+export BUILD_OUTPUT_ARCH=x86_64
 export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
 ```
 
@@ -120,8 +167,10 @@ cmake \
   -DINSTALL_ANDROID_EXAMPLES=OFF \
   -DANDROID_ABI=${BUILD_OUTPUT_ARCH} \
   -DWITH_TBB=ON \
+  -DWITH_ITT=OFF \
   /opencv
 ```
+
 Wait until the configuration steps is completed.
 Using a text editor to open the file `${BUILD_OUTPUT_DIR}/modules/java/CMakeFiles/opencv_java.dir/cmake_clean.cmake` and remove these lines.
 
