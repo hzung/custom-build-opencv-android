@@ -30,7 +30,7 @@ After unzipping the android-ndk-r14b,
 
 **3.1.** Open the file `~/custom-build-opencv-android/android-ndk-r14b/build/tools/make_standalone_toolchain.py`
 
-**3.2.** Goto the line 402 and edit the line:
+**3.2.** Goto the line 402 and edit the line to fix the issue for creating the toolchain for the chip `x86` and `x86_64`.
 
 ```
 assert len(dirs) == 1
@@ -96,7 +96,7 @@ Here is the result directory structure. Make sure that the structure is correct.
 
 **Step 1**. Access to the `bash` shell of the `opencv_env` container and export one of the environment variables.
 
-* Arch arm
+* arm
 
 ```
 docker exec -it opencv_env /bin/bash
@@ -106,7 +106,7 @@ export BUILD_OUTPUT_ARCH=armeabi-v7a
 export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
 ```
 
-* Arch arm64
+* arm64
 
 ```
 docker exec -it opencv_env /bin/bash
@@ -116,7 +116,7 @@ export BUILD_OUTPUT_ARCH=arm64-v8a
 export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
 ```
 
-* Arch x86
+* x86
 
 ```
 docker exec -it opencv_env /bin/bash
@@ -126,7 +126,7 @@ export BUILD_OUTPUT_ARCH=x86
 export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
 ```
 
-* [CHECKING] Arch x86_64
+* x86_64
 
 ```
 docker exec -it opencv_env /bin/bash
@@ -141,6 +141,13 @@ export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
 ```
 /android-ndk-r14b/build/tools/make_standalone_toolchain.py --arch ${TOOLCHAIN_ARCH} --api 23 --install-dir ${ANDROID_STANDALONE_TOOLCHAIN}
 ```
+
+**Extra step** for `x86_64` only.
+
+```
+cp ${ANDROID_STANDALONE_TOOLCHAIN}/x86_64-linux-android/lib64/{*++.a,libgnustl_shared.so} ${ANDROID_STANDALONE_TOOLCHAIN}/x86_64-linux-android/lib/
+```
+
 
 **Step 4**. Create a build directory for arm64-v8
 
@@ -266,7 +273,7 @@ libopencv_imgproc.a \
 ${ANDROID_STANDALONE_TOOLCHAIN}/bin/*android*strip --strip-unneeded libopencv_output.so
 ```
 
-We're ready to intergrate this file `libopencv_output.so` the Android project now.
+We're ready to intergrate this file `${BUILD_OUTPUT_DIR}/lib/${BUILD_OUTPUT_ARCH}/libopencv_output.so` the Android project now.
 
 In Java, loading library by the code:
 
