@@ -284,4 +284,68 @@ System.loadLibrary("opencv_output");
 Done!
 
 
+Export Calib3D
 
+```
+${ANDROID_STANDALONE_TOOLCHAIN}/bin/*android*-g++ \
+-shared -o libopencv_output.so \
+--sysroot=${ANDROID_STANDALONE_TOOLCHAIN}/sysroot/ \
+-Wl,--whole-archive \
+libopencv_core.a \
+libopencv_imgproc.a \
+libopencv_calib3d.a \
+libopencv_features2d.a \
+libopencv_flann.a \
+-Wl,--no-whole-archive
+
+${ANDROID_STANDALONE_TOOLCHAIN}/bin/*android*-g++ \
+-L ${BUILD_OUTPUT_DIR}/3rdparty/lib/${BUILD_OUTPUT_ARCH} \
+-ldl \
+-lm \
+-llog \
+-ljnigraphics \
+-lz \
+-lcpufeatures \
+-fexceptions \
+-frtti \
+-fsigned-char \
+-shared -Wl,-soname,libopencv_output.so \
+-o libopencv_output.so \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/Mat.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/converters.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/jni_part.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/listconverters.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/generator/src/cpp/utils.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/__/core/misc/java/src/cpp/core_manual.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/__/dnn/misc/java/src/cpp/dnn_converters.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/__/features2d/misc/java/src/cpp/features2d_converters.cpp.o \
+../../3rdparty/cpufeatures/CMakeFiles/libcpufeatures.dir/cpu-features.c.o \
+../../modules/java/CMakeFiles/opencv_java.dir/gen/core.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/gen/features2d.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/gen/imgproc.cpp.o \
+../../modules/java/CMakeFiles/opencv_java.dir/gen/calib3d.cpp.o \
+--sysroot=${ANDROID_STANDALONE_TOOLCHAIN}/sysroot \
+-Wl,--whole-archive \
+libopencv_core.a \
+libopencv_imgproc.a \
+libopencv_calib3d.a \
+libopencv_features2d.a \
+libopencv_flann.a \
+-Wl,--no-whole-archive
+
+${ANDROID_STANDALONE_TOOLCHAIN}/bin/*android*strip --strip-unneeded libopencv_output.so
+```
+
+Tool find the function in the lib
+
+```
+NEED_TO_FIND="_ZN2cv5flann11IndexParamsC1Ev"
+for i in $(find . -type f | grep -E ".o$|.a$")
+do
+    COUNT=$(strings -a $i | grep ${NEED_TO_FIND} | wc -l)
+    if [ $COUNT -ge 1 ]
+    then
+        echo $i >> output.txt
+    fi
+done
+```
