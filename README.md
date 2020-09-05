@@ -63,7 +63,7 @@ docker container run \
 
 ```
 docker exec -it opencv_env /bin/bash
-android update sdk --licenses --no-ui --all --filter platform-tools,build-tools-23.0.3,android-25
+android update sdk --no-ui --all --filter platform-tools,build-tools-23.0.3,android-25
 ```
 **Note:** You can list for other packages using this command: `android list sdk --all --extended`
 
