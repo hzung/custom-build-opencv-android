@@ -5,7 +5,7 @@ OpenCV is an awesome library with the enumerous built-in modules which support u
 
 ## Environments
 
-- [Docker latest](https://docs.docker.com/get-docker/)
+- [Install Docker latest version](https://docs.docker.com/get-docker/)
 
 
 ## Setup Build Environment Steps
