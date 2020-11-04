@@ -1,7 +1,7 @@
 
 # How to build a custom opencv 3.4.0 for Android
 
-OpenCV is an awesome library with an enumerous built-in modules which support us a lot in image processing. But sometimes, we don't need to import all of these modules to archive what we want. This could make the application size is pretty big. We just need some very specific modules such as `core lib` and `imgproc`. And in this tutorial, I'm gonna show you how to custom the opencv build for Android step-by-step.
+OpenCV is an awesome library with the enumerous built-in modules which support us a lot in the image processing. But sometimes, we don't need to import all of these modules to archive what we want. This could make the application size pretty big. We just need some very specific modules such as `core lib` and `imgproc`. And in this tutorial, I'm gonna show you how to custom the opencv build for Android steps-by-steps.
 
 ## Environments
 
@@ -94,9 +94,9 @@ Here is the result directory structure. Make sure that the structure is correct.
 
 ## Build Steps For armeabi-v7a/arm64-v8a
 
-**Step 1**. Access to the `bash` shell of the `opencv_env` container and export one of the environment variables.
+**Step 1**. Access to the `bash` shell of the `opencv_env` container and export ONE of the environment variables.
 
-* arm
+* For arm chipset
 
 ```
 docker exec -it opencv_env /bin/bash
@@ -106,7 +106,7 @@ export BUILD_OUTPUT_ARCH=armeabi-v7a
 export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
 ```
 
-* arm64
+* For arm64 chipset
 
 ```
 docker exec -it opencv_env /bin/bash
@@ -116,7 +116,7 @@ export BUILD_OUTPUT_ARCH=arm64-v8a
 export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
 ```
 
-* x86
+* For x86 chipset
 
 ```
 docker exec -it opencv_env /bin/bash
@@ -126,7 +126,7 @@ export BUILD_OUTPUT_ARCH=x86
 export BUILD_OUTPUT_DIR=/builds/${BUILD_OUTPUT_ARCH}
 ```
 
-* x86_64
+* For x86_64 chipset
 
 ```
 docker exec -it opencv_env /bin/bash
@@ -203,7 +203,7 @@ Using a text editor to open the file `${BUILD_OUTPUT_DIR}/modules/java/CMakeFile
 "CMakeFiles/opencv_java.dir/gen/calib3d.cpp.o"
 ```
 
-This configuration prevent the compiling process removing these files. We're gonna need these files when linking library (**step 9**).
+This configuration prevent the compiling process removing these above files. We're gonna need these files when manually linking library (**step 9**).
 
 **Step 6**. Start compiling with 4 compiling jobs. Pick the greater number for faster compiling if your computer is trong.
 
@@ -213,7 +213,7 @@ cd ${BUILD_OUTPUT_DIR} && make -j 4
 
 After this step, you can import the `libopencv_java3.so` into the Android project. It should work fine. But this is not what we want. We want to make the size of `libopencv_java3.so` smaller. The current size is pretty big for us.
 
-**Step 7**. Let's custom the build contains only `libopencv_core.a` and `libopencv_imgproc.a`.
+**Step 7**. Let's re-bundle the build to make it contains only `libopencv_core.a` and `libopencv_imgproc.a`.
 
 ```
 cd ${BUILD_OUTPUT_DIR}/lib/${BUILD_OUTPUT_ARCH}
