@@ -5,3 +5,4 @@ toolchains/arm*
 toolchains/x86*
 builds/arm*
 builds/x86*
+._*
